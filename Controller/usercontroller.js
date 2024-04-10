@@ -60,6 +60,50 @@ const userRegister = async (req, res) => {
   }
 };
 
+
+
+
+const subscriptionadd = async (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  console.log("User role:", role);
+  console.log("User ID:", userId);
+
+  try {
+    if (role !== "user") {
+      return res
+        .status(403)
+        .json({ status: 403, error: "Forbidden for regular users" });
+    }
+
+    const { category_name } = req.body;
+
+    const catName = await categoryService.checkduplicateCategoryname(
+      category_name
+    );
+    if (catName) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Category name already register" });
+    }
+
+    const category = await categoryService.addcategory(category_name);
+
+    res.status(201).json({
+      status: 201,
+      message: category,
+    });
+  } catch (error) {
+    console.error("Error in add category:", error);
+    res.status(500).json({
+      status: 500,
+      error: "Failed to add category",
+      stack: error.stack,
+    });
+  }
+};
+
 module.exports = {
   userRegister,
 };
